@@ -24,21 +24,30 @@ Deep Learning 모델을 학습시키는 데에 있어서, Dataset의 Class Balan
 
 <img src='Image/Object_Detection01.png' width='100%'>
 
-Aritifical Intelligence 중의 하나인 Machine Learning, Machine Learning 중의 하나인 Deep Learning, Deep Learning 중의 하나인 Computer Vision, Computer Vision 중의 하나인 Object Detection이 우리가 해결하고자 하는 문제이다. Object Detection 문제는 Image 내의 하나 또는 여러 객체에 대하여 Bounding Box를 추출하고, 해당 객체의 클래스를 분류하는 것을 목적으로 한다. Computer Vision에 관한 개괄적인 내용이 필요하다면 [Image Instance Segmentation with Mask R-CNN](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Mask-R-CNN.md) [3] 편을, Object Detection 문제 해결 원리에 대한 내용이 필요하다면 [Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Object-Detection.md) [4] 편을 참고할 수 있다.
+Aritifical Intelligence 중의 하나인 Machine Learning, Machine Learning 중의 하나인 Deep Learning, Deep Learning 중의 하나인 Computer Vision, Computer Vision 중의 하나인 Object Detection이 우리가 해결하고자 하는 문제이다. Object Detection 문제는 Image 내의 하나 또는 여러 객체에 대하여 Bounding Box를 추출하고, 해당 객체의 클래스를 분류하는 것을 목적으로 한다. Computer Vision에 관한 개괄적인 내용이 필요하다면 [Report: Mask-R-CNN](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Mask-R-CNN.md) [3] 편을, Object Detection 문제 해결 원리에 대한 내용이 필요하다면 [Report: Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Object-Detection.md) [4] 편을 참고하는 것을 권한다.
 
 ## 2.2. YOLO v3
 
-github link
+<img src='Image/YOLOv301.png' width='100%'>
 
-yolo v1, v2 paper review
+Object Detection 모델 중의 하나인 YOLO v3는 One-Stage Detection Model 로써, Two-Stage Detection Model에 비해 빠른 속도를 보인다. 기존 YOLO 버전에 비해 3군데의 resolution에서 좀 더 많은 Bounding Box를 추출하기 때문에, 정확도 향상과 작은 물체에 대한 탐지 능력 향상 등의 효과를 얻을 수 있었다. 해당 모델에 대하여 어떻게 작동하는지에 대한 내용이 필요하다면 [How to Perform Object Detection With YOLOv3 in Keras](https://github.com/YoonSungLee/Detection-Segmentation-Project/blob/master/How_to_Perform_Object_Detection_With_YOLOv3_in_Keras.ipynb) [5] 편을 참고하는 것을 권고한다. 이 외에도 YOLO의 다른 버전에 대한 모델을 이해하고 싶다면, 논문 리뷰인 [Review: You Only Look Once: Unified, Real-Time Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_YOLOv1.md) [6]과 [Review: YOLO9000: Better, Faster, Stronger](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_YOLO9000.md) [7]에서 그 내용을 확인할 수 있다.
 
 ## 2.3. Image Augmentation
 
-github link
+Image Augmentation은 기존 데이터를 부풀리는 기법이다. 이를 통해 모델이 기존 데이터의 패턴 뿐만 아니라 부풀린 데이터에 의해 새로운 패턴을 발견하여, 모델의 성능을 좀 더 robust하게 만드는 효과를 볼 수 있다. Image Augmentation의 방법으로는 좌우 반전, 크롭(자르기), 밝기 조절, 회전, 이동, 확대 및 축소, 랜덤 노이즈 등 생각할 수 있는 모든 방법들이 해당한다. [9]<br>
+Image Augmentation은 Class Imbalanced Problem을 해결하는데에도 사용할 수 있다. 앞서 언급한 예를 다시 들자면, 강아지 Image가 90장, 고양이 Image가 10장 포함된 Dataset을 가지고 있다고 해보자. 이 상태에서 모델에 학습시키면(물론 성능이 좋은 모델은 좋은 결과를 내겠지만), Class Imbalanced Problem 때문에 모델을 제대로 학습시킬 수 없다. 특히 Object Detection 모델의 성능 평가 기준 중의 하나인 mAP를 적용해보면, Class별로 AP의 차이가 큰 결과를 얻을 것이다. 이러한 경우에 고양이의 사진 10장을 Image Augmentation을 사용하면 어떻게 될까? 위에서 언급한 Image Augmentation의 방법을 적용하여 고양이의 사진을 10장에서 100장으로 부풀린다면, Class Imbalanced Problem이 해결되어 Class 별 AP가 일정한 결과를 기대할 수 있다.<br>
+다만 Image Augmentation을 사용함에 있어서 고민해야 할 것은, hyperparameter setting이다. 위에서 언급한 여러 기법들 외에도 무수히 많은 Image Augmentation 기법들이 존재하며, 특정 기법 내에서도 각도, 거리 등 기법을 적용할 정도에 대한 hyperparameter를 직접 설정해주어야 한다. 따라서 어떤 Augmentation 기법을 사용하면 좋을지, 그리고 어떻게 hyperparameter를 setting해야할지를 주어진 문제에 따라 적용하는 skill이 필요하다.<br>
+Image Augmentation을 코드로 확인하고 싶다면 github [Image Augmentation Tool](https://github.com/YoonSungLee/Image_Augmentation_Tool) [8] 을 참고할 수 있다.
 
 ## 2.4. Focal Loss
 
-github link paper review
+<img src='Image/Focal_Loss01.png' width='100%'>
+
+Class Imbalanced Problem을 해결할 수 있는 또 하나의 방법은 'Focal Loss for Dense Object Detection' 논문을 참고하면서 그 아이디어를 얻을 수 있다.<br>
+Multi Class Image를 Classification하기 위해 사용하는 일반적인 loss function은 Cross Entropy Function이다. 이는 각 Class마다 probability의 log를 취해서 나온 결과의 음수값을 loss 값으로 설정함으로써, Class를 잘 맞추면(probability가 1에 가까워지면) loss 값이 작아지고 Class를 못 맞추면(probability가 0에 가까워지면) loss 값이 커지는 역할을 한다.<br>
+문제는 Dataset의 Class가 Imabalance 할 때 발생한다. 다시 한 번 강아지와 고양이 Dataset을 예로 들어보겠다. 만약 일반적인 Cross Entropy Function을 사용한다면 어떤 문제가 발생할까? 학습 초기에 강아지 Image 하나에 대한 loss값과 고양이 Image 하나에 대한 loss값은 같을 것이다. 하지만 total loss값은 100장의 Image에 대한 loss값을 모두 합치므로 결국 강아지에 대한 loss값이 고양이에 대한 loss값보다 9배나 커지게 된다. 즉, 모델은 강아지에 대한 loss값을 줄여서 total loss값을 줄이는 방향으로 학습이 진행되기 때문에 결국 강아지는 잘 맞추고 고양이는 못 맞추는 문제가 발생하게 된다. 고양이 Image 하나에 대한 loss값이 아무리 크더라도, 절대적인 loss값들의 수가 작기 때문에 총합으로 봤을 때 밀리는 것이다.<br>
+따라서 Focal Loss는 이러한 문제를 해결하기 위해 위의 그림과 같이 기존 Cross Entropy Function에 weight를 곱해준다. 이는 (1 - pt)^gamma의 값으로써, 만약 gamma의 값이 2라고 한다면 특정 Class를 잘 맞출수록(probability가 1에 가까워지면) (1-pt)^gamma의 값이 0에 가까워진 상태로 곱해진다. 즉, 잘 맞춘 Class에 대하여 down weight의 역할을 수행한다. 반대로 특정 Class를 못 맞출수록(probability가 0에 가까워지면) 곱해주는 값의 범위가 (물론 1보다는 작아지지만) 조금밖에 작아지지 않기 때문에, 해당 Class의 loss 값이 상대적으로 커지는 역할을 한다. 이것이 바로 Focal Loss의 핵심이라고 할 수 있다.<br>
+해당 내용에 대하여 구체적으로 알기를 원한다면, 논문 리뷰인 [Review: Focal Loss for Dense Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_Focal_Loss_for_Dense_Object_Detection.ipynb) [10]을 참고하는 것을 권고한다.
 
 # 3. Experiments
 
@@ -67,5 +76,11 @@ Recall
 
 [1] ["마스크 착용한 분만 문 열어 드립니다"](https://blog.lgcns.com/2216), LG CNS<br>
 [2] [Mask-Wearing-Detection-Project-with-YOLOv3](https://github.com/YoonSungLee/Mask-Wearing-Detection-Project-with-YOLOv3), YoonSungLee<br>
-[3] [Image Instance Segmentation with Mask R-CNN](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Mask-R-CNN.md), YoonSungLee<br>
-[4] [Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Object-Detection.md), YoonSungLee
+[3] [Report: Mask-R-CNN](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Mask-R-CNN.md), YoonSungLee<br>
+[4] [Report: Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Object-Detection.md), YoonSungLee<br>
+[5] [How to Perform Object Detection With YOLOv3 in Keras](https://github.com/YoonSungLee/Detection-Segmentation-Project/blob/master/How_to_Perform_Object_Detection_With_YOLOv3_in_Keras.ipynb), YoonSungLee<br>
+[6] [Review: You Only Look Once: Unified, Real-Time Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_YOLOv1.md), YoonSungLee<br>
+[7] [Review: YOLO9000: Better, Faster, Stronger](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_YOLO9000.md), YoonSungLee<br>
+[8] [Image Augmentation Tool](https://github.com/YoonSungLee/Image_Augmentation_Tool), YoonSungLee<br>
+[9] [Data Preprocessing & Augmentation](https://nittaku.tistory.com/272), nittaku<br>
+[10] [Review: Focal Loss for Dense Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_Focal_Loss_for_Dense_Object_Detection.ipynb), YoonSungLee
