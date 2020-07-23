@@ -7,7 +7,7 @@
 *keyword : mask wearing detection, yolo v3, transfer learning, class imbalance, data augmentation, focal loss*<br>
 최근 코로나 바이러스 문제로 인해 해당 질병의 전파 속도가 증가하고 있다. 이에 따라 정부는 마스크 착용, 손 씻기, 사회적 거리 두기 등을 권고하고 있는 상황이다. 마스크 착용을 통해 비말 감염을 예방할 수 있기 때문에 마스크를 착용하지 않는 사람은 특정 건물이나 대중교통을 이용하는 데에 제한을 두어 마스크 착용의 의무화를 시행하고 있다. 하지만 그럼에도 불구하고 마스크를 착용하지 않는 사람들을 쉽게 볼 수 있고, 이들을 일일히 관리하기란 힘든 일이다. 이러한 상황에서 마스크 착용에 대한 탐지를 자동화하는 시스템은 인력 낭비를 줄이고 효율적인 관리를 기대할 수 있을 것이다. 따라서 해당 프로젝트는 'Medical Mask Wearing Detection Model' 에 대한 내용을 담고 있다. Dataset 수집부터, Model 선택, Trasfer Learing에 관한 전반적인 내용을 다룬다. 특히 수집된 Dataset은 마스크를 착용한 사람(with_mask)에 비해, 착용하지 않은 사람(without_mask)이나 잘못 착용한 사람(mask_weared_incorrect)의 비율이 작은 문제를 가지고 있다. 따라서 이러한 Class Imbalanced Problem에 대한 고민과 문제를 해결하는 내용 또한 다루고 있다. github code는 아래 링크를 통해 확인할 수 있다.<br><br>
 
-*code) https://github.com/YoonSungLee/PyTorch-YOLOv3*
+*code) https://github.com/YoonSungLee/PyTorch-YOLOv3* [0]
 
 ---
 
@@ -54,27 +54,286 @@ Multi Class Image를 Classification하기 위해 사용하는 일반적인 loss 
 
 ## 3.1. Dataset
 
-License Problem
+<img src='Image/Dataset01.png' width='100%'>
 
-## 3.2. Transfer Learning
+<img src='Image/Dataset02.png' width='100%'>
 
-Environment
+Mask Wearing Datset에 대한 수집 문제는 Kaggle[11]을 통해 간단히 해결했다.<br>
+만약 웹에서 공개된 Dataset을 수집할 수 없다면 직접 크롤링을 하는 등의 방법을 사용해야 하는데, 해당 문제가 사람을 대상으로 하기 때문에 초상권 문제 등의 이슈를 고려해야 할 것이다. 하지만 위의 사진과 같이 Kaggle을 통해서 쉽게 데이터를 수집할 수 있었으며, 해당 Dataset은 초상권이나 저작권 문제를 고려하지 않아도 된다. 위의 첫 번째 사진의 License를 살펴보면 'CC0:Public Domain' 이라고 적혀 있는 것을 확인할 수 있다. 해당 라이센스는 '원저작물에 대하여 저작권자가 그 권리를 포기하거나 기부한 저작물'[12]을 의미하는 것으로, 누구나 자유롭게 이용이 가능하다.<br>
+해당 Dataset에 대한 개괄적인 설명은 다음과 같다.
 
-## 3.3. Evaluation
+```
+Contain
+- 853 images(.png)
+- 853 annotations(.xml)
+```
 
-mAP
+```
+Class
+- With mask ---- 3232
+- Without mask ---- 717
+- Mask weared incorrect ---- 123
+```
 
-10 experiments
+특히 Dataset 내에 있는 각 Class별 갯수를 counting하기 위해 Pytorch-YOLOv3[0]의 class_count.py를 작성하여 위와 같은 결과를 도출할 수 있었다.<br>이 과정을 통해 해당 Dataset은 Class Imbalanced Problem을 가지고 있다는 것을 확인할 수 있었다. with mask가 다른 class에 비해 압도적으로 그 수가 많은 상황이다. 다른 Dataset을 찾아볼 수도 있고, 크롤링을 통해 직접 annotation 작업을 수행할 수 도 있으며, 참신한 방법으로 GAN을 통해 원하는 class의 image를 생성할 수 도 있을 것이다. 하지만 여전히 초상권에 대한 이슈를 고려해야 할 것이며, 앞으로 Dataset을 다룰 때 이와 같은 Class Imbalanced Problem이 많이 나타날 가능성이 있을 것이다. 따라서 해당 Dataset을 사용하면서 문제를 해결해보는 식으로 방향을 수립했다.
+
+## 3.2. Environment
+
+* GeForce RTX 2080 Ti
+* Window
+* Pycharm
+* Anaconda
+* Pytorch
+
+## 3.3. Transfer Learning
+
+YOLO v3 Model에 Dataset을 학습시키려면 몇 가지 수행해야 할 작업들이 있다. .xml 파일을 .txt파일로 바꾸는 작업, classes 파일 생성 작업, image 경로 txt 파일 생성 작업 등이 이에 해당한다. 이에 대한 과정은 Pytorch-YOLO v3[0]의 README.md를 참고해서 이루어졌다.
+
+## 3.4. Experiments
+
+Transfer Learning의 epoch 수는 hyperparameter로써, 여러 실험을 통해 설정하거나 EarlyStopping 등의 기법을 사용하기도 한다. 해당 github repository의 defalut는 100으로 설정되어 있다. 그런데 그 시점 안에 overfitting이 발생하지 않을 수도 있기 때문에, mAP training graph를 살펴보고 100 epoch을 추가로 학습시켜주는 방법을 사용했다.
+
+### 3.4.1. Original Dataset
+
+```
+Image: 853 <-- (train 752 + test 100)
+- with_mask: 3232
+- without_mask: 717
+- mask_weared_incorrect: 123
+```
+
+가장 먼저 아무런 preprocessing 없이 주어진 Dataset을 그대로 학습시켰다.
+
+### - 100 epoch
+
+<img src='Image/ver01_original_100epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.674741 --> 92 epoch
++ Class '0' (with_mask) - AP: 0.759864
++ Class '1' (without_mask) - AP: 0.786043
++ Class '2' (mask_weared_incorrect) - AP: 0.478316
+```
+
+### - 200 epoch
+
+<img src='Image/ver02_original_200epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.725457 --> 74 epoch
++ Class '0' (with_mask) - AP: 0.758708
++ Class '1' (without_mask) - AP: 0.863695
++ Class '2' (mask_weared_incorrect) - AP: 0.553968
+```
+
+*discussion*<br>
+사실 첫 번째 실험을 수행하면서 Class Imbalanced Problem이 모델의 성능에 꽤 좋지 않은 영향을 준다는 것을 깨달았다. Dataset에 'with mask' class가 가장 많이 분포되어 있기 때문에, 해당 class의 mAP는 높게 측정된다. 반면에 'mask weared incorrect' class는 너무 적게 분포되어 있어서 mAP 또한 낮게 측정된다. 따라서 해당 problem을 해결하기 위해 여러 방법을 고민해보았고, 첫 번째로 Image Augmentation을 통해 해당 problem을 풀고자 했다.
+
+### 3.4.2. Image Augmented Dataset
+
+Class별로 mAP의 차이가 큰 이유는 Dataset의 Class Imbalanced Problem 때문이다. 따라서 해당 문제를 해결하기 위해서는 class 간 비율이 일정해야 하며, 이는 곧 'mask weared incorrect' class의 수가 상대적으로 증가해야한다.<br>
+Dataset의 Image를 살펴보면, Medical Mask 관련 Dataset이라서 그런지는 몰라도 Image 내에 마스크를 착용한 사람은 많이 등장한다. 반면에 마스크를 착용하지 않은 사람이나 잘못 착용한 사람은 굉장히 드물며, 대부분의 이미지에서 살펴보기가 힘들다. 따라서 'mask weared incorrect' class가 존재하는 Image들을 모조리 뽑아내면 몇 장이나 될지 파악하는 작업을 거쳤다. 해당 과정은 Pytorch-YOLOv3[0]에서 Make_balance.py 코드를 작성하여 수행했다.<br>
+결과는 다음과 같다.<br>
+
+```
+Image: 97
+- with_mask : 624
+- without_mask : 157
+- mask_weared_incorrect : 123
+```
+
+Image의 수가 853장에서 97장으로 대폭 줄었다. 97장의 Image는 적어도 하나의 'mask weared incorrect' class를 가지고 있지만, Dataset이 너무 작기 때문에 모델을 학습한다고 하더라도 좋은 성능을 기대할 수는 없다. 따라서 Image Augmentation을 적용하여 데이터셋을 부풀리는 방법을 고려했다.<br>
+
+Image Augmentation 기법[9]은 종류도 많을 뿐더러, 각 종류마다 기법을 적용할 정도를 결정하는 hyperparameter도 존재한다. 즉, 어떻게 설계하느냐에 따라 모델의 성능에 차이를 줄 수 있는 요소이다. 해당 프로젝트에서는 두 가지 요소를 고려하여 Augmentation 기법을 적용하였다.[8]<br>
+
+1. Augmentation 1: scale(0.7, 0.7), rotate=15<br>
+   YOLO model paper에서 성능 평가 결과를 살펴보면, 일반적으로 small object에 대한 성능이 다른 모델들에 비해 낮다는 특징을 가지고 있다. 따라서 Image의 scale을 줄이는 방법을 적용하여 small object에 대하여 물체가 잘 탐지할 수 있도록 했다.
+2. Augmentation 2: GaussianNoise(loc=0, scale=(0.0, 0.15*255)<br>
+   Deep Learning Vision 관련 교육에서, 기존 이미지에 Noise를 준 상태로 모델을 학습시키면 모델이 좀 더 robust하게 만들어준다는 노하우를 들은 적이 있다. 따라서 Image에 GaussianNoise를 주는 방법을 적용하여 모델이 좀 더 robust할 수 있도록 했다.
+
+총 97장의 Image 중에서 Train Dataset 82장, Test Datset 15장을 남겨두었다. Train Dataset 82장을 대상으로 Augmentation 1번을 통해 82장을, Augmentation 2번을 통해 82장을 생성하였고, 이를 통해 총 Train Dataset = 82 + 82 + 82 = 246장을 구축했다. 또한 새로 구축한 Dataset에 대하여 class의 개수를 다시 한 번 출력해서 결과를 확인했다. 정리하자면 다음과 같다.
+
+```
+Image: 261 <-- (train 246 + test 15)
+- with_mask: 1516
+- without_mask: 405
+- mask_weared_incorrect: 327
+```
+
+Augmentation을 적용한 97장의 Image는 (원본 Dataset보다는 조금 나아졌지만) 여전히 Class Imbalanced Problem이 존재했다. 따라서 이 상태로 Augmentation을 실시하더라도 비율을 동일하게 맞추기는 어렵다. 하지만 원본 Dataset에 비해서 Class Imbalanced Problem이 조금이나마 해결되었고, Dataset의 수도 증가시켰기 때문에 해당 Datset을 대상으로 실험을 수행했다. 실제 이 문제를 해결하기 위해서는 'mask weared incorrect' class를 crop을 해서 사용한다던지, 새로 Dataset을 구축한다던지 등의 시간을 요하는 작업이 필요하다.
+
+### - 100 epoch
+
+<img src='Image/ver03_balance_100epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.568690 -→ 72 epoch
++ Class '0' (with_mask) - AP: 0.605556
++ Class '1' (without_mask) - AP: 0.234915
++ Class '2' (mask_weared_incorrect) - AP: 0.865600
+```
+
+### - 200 epoch
+
+<img src='Image/ver04_balance_200epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.589408 →  90 epoch
++ Class '0' (with_mask) - AP: 0.595541
++ Class '1' (without_mask) - AP: 0.333020
++ Class '2' (mask_weared_incorrect) - AP: 0.839664
+```
+
+*discussion*<br>
+예상과는 달리 Image Augmentation을 적용했을때 오히려 전체적인 성능(mAP)이 떨어졌다. 또한 이상한 점은 'mask_weared_incorrect' class의 mAP가 증가한 대신, 'without_mask' class의 mAP가 감소하는 결과를 얻었다. 이 외에도 위의 그래프를 통해 100 epoch이 넘어서부터는 상대적으로 불안한 학습을 한다는 것을 확인할 수 있다. 이에 대한 원인은 여러가지가 있겠지만, 전체 Dataset 크기의 부족, 적합하지 않은 Augmentation 기법 적용, local minimum problem 등을 생각해 볼 수 있을 것이다.<br>
+해당 상태에서 추가적인 Augmentation을 적용한다면 Class Imbalanced Problem이 심해질 것이고, 이는 곧 문제를 원점으로 돌아가게 만든다. 따라서 다른 방법이 필요했다. Class Imbalance에 관한 여러 paper를 찾아보다가, Cross Entropy Function이라는 Loss Function을 새로 정의하는 'Focal Loss for Dense Object Detection'[10]을 발견했다. 해당 기법을 적용할 계획을 세웠다.
+
+### 3.4.3. Original Dataset + Focal Loss(alpha=1, gamma=2)
+
+YOLO v3의 Loss Function에 Focal Loss를 적용하는 작업에 관한 가이드가 없어서 loss function의 수식 부분을 여러 자료를 참고하며 다시 한 번 살펴봤다.[13] YOLO v3는 obj와 noobj에 대하여 각각에 대한 Classification Loss가 존재하는데, 현재 문제는 물체냐 배경이냐에 대한 문제가 아니기 때문에 noobj 항에는 Focal Loss를 적용하지 않았다. 단지 obj 항에만 Focal Loss를 적용하여, 잘 학습되지 않는 class에 대해 가중치를 높게(엄밀히 말하면 모두의 가중치가 낮아지지만 잘 학습되지 않는 class의 가중치는 조금 낮아지도록) 부여하도록 했다. <br>
+또한 Focal Loss는 alpha와 gamma라는 두 개의 hyperparameter가 존재한다. 따라서 아래와 같이 3가지 조건에 대한 실험을 통해 최적의 hyperparameter를 추출했다.
+
+1. alpha balancing은 제거하고 gamma는 논문에 의거하여 사용: alpha=1, gamma=2
+2. 논문에서 도출된 최적의 hyperparameter 사용: alpha=0.25, gamma=2
+3. 논문에서 도출된 두 번째로 최적의 hyperparameter 사용: alpha=0.25, gamma=1
+
+YOLO v3에 Focal Loss를 적용한 코드는 Pytorch-YOLOv3[0] github을 통해 확인할 수 있다.
+
+```
+Image: 853 <-- (train 752 + test 100)
+- with_mask: 3232
+- without_mask: 717
+- mask_weared_incorrect: 123
+```
+
+### - 100 epoch
+
+<img src='Image/ver05_focal_alpha1_gamma2_100epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.733690 -→ 94 epoch
++ Class '0' (with_mask) - AP: 0.779732
++ Class '1' (without_mask) - AP: 0.688204
++ Class '2' (mask_weared_incorrect) - AP: 0.733135
+```
+
+### - 200 epoch
+
+<img src='Image/ver06_focal_alpha1_gamma2_200epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.724188 --> 91 epoch
++ Class '0' (with_mask) - AP: 0.783647
++ Class '1' (without_mask) - AP: 0.803041
++ Class '2' (mask_weared_incorrect) - AP: 0.585877
+```
+
+*discussion*<br>
+놀랍게도 class별 mAP의 차이가 꽤 많이 좁혀졌다. 100 epoch을 넘어가면서 불안정한 성능을 보이기는 하지만, 각 class의 AP가 골고루 상승하여 전체적인 mAP가 상승했다. 따라서 Focal Loss를 적용함으로써 Class Imbalanced Problem 문제를 해결할 수 있다고 생각했다.
+
+### 3.4.4. Original Dataset + Focal Loss(alpha=0.25, gamma=2)(Best!)
+
+```
+Image: 853 <-- (train 752 + test 100)
+- with_mask: 3232
+- without_mask: 717
+- mask_weared_incorrect: 123
+```
+
+### - 100 epoch
+
+<img src='Image/ver07_focal_alpha0.25_gamma2_100epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.749394 --> 90 epoch
++ Class '0' (with_mask) - AP: 0.750385
++ Class '1' (without_mask) - AP: 0.842590
++ Class '2' (mask_weared_incorrect) - AP: 0.655206
+```
+
+### - 200 epoch(Best!)
+
+<img src='Image/ver08_focal_alpha0.25_gamma2_200epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.757417 --> 22 epoch
++ Class '0' (with_mask) - AP: 0.790415
++ Class '1' (without_mask) - AP: 0.799295
++ Class '2' (mask_weared_incorrect) - AP: 0.682540
+```
+
+*discussion*<br>
+해당 실험은 alpha balancing을 제거하지 않은 채, paper에서 제시한 최적의 hyperparameter를 적용하여 모델을 학습한 결과이다. 마찬가지로 Class Imbalacned Problem을 해결했으며, 놀랍게도 지금까지의 실험 중에 가장 높은 mAP 결과를 얻을 수 있었다. 122 epoch을 기준으로 더 이상 모델의 성능이 증가하지는 않았다.
+
+### 3.4.5. Original Dataset + Focal Loss(alpha=0.25, gamma=1)
+
+```
+Image: 853 <-- (train 752 + test 100)
+- with_mask: 3232
+- without_mask: 717
+- mask_weared_incorrect: 123
+```
+
+### - 100 epoch
+
+<img src='Image/ver09_focal_alpha0.25_gamma1_100epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.743232 --> 79 epoch
++ Class '0' (with_mask) - AP: 0.763535
++ Class '1' (without_mask) - AP: 0.792701
++ Class '2' (mask_weared_incorrect) - AP: 0.673460
+```
+
+### - 200 epoch
+
+<img src='Image/ver10_focal_alpha0.25_gamma1_200epoch.png' width='60%'>
+
+```
+<Result>
+maximum mAP: 0.749586 --> 8 epoch
++ Class '0' (with_mask) - AP: 0.791903
++ Class '1' (without_mask) - AP: 0.802906
++ Class '2' (mask_weared_incorrect) - AP: 0.653950
+```
+
+해당 실험은 마찬가지로 alpha balancing은 제거하지 않은 채, paper에서 제시한 2번째로 최적의 hyperparameter를 적용하여 모델을 학습한 결과이다. 이 또한 마찬가지로 Class Imbalanced Problem은 해결했지만, 최적의 hyperparameter를 적용한 모델보다는 성능이 아주 조금 떨어지는 결과를 확인할 수 있었다. 이를 통해 Focal Loss를 적용함에 있어서, 해당 프로젝트의 Dataset은 paper에서 제시한 hyperparameter를 적용하는 것이 가장 좋은 성능을 낼 수 있다는 점을 확인했다.
+
+## 3.5. Evaluation
+
+위의 Experiments를 정리하자면 다음과 같다.<br>
+
+| Experiment number | Loss Fucntion |  alpha   | gamma | with_mask AP | without_mask AP | mask_weared_incorrect AP | maximum mAP  |
+| :---------------: | :-----------: | :------: | :---: | :----------: | :-------------: | :----------------------: | :----------: |
+|         1         |      CE       |    1     |   0   |   0.758708   |    0.863695     |         0.553968         |   0.725457   |
+|         2         |    CE(Aug)    |    1     |   0   |   0.595541   |    0.333020     |         0.839664         |   0.589408   |
+|         3         |      FL       |    1     |   2   |   0.779732   |    0.688204     |         0.733135         |   0.733690   |
+|       **4**       |    **FL**     | **0.25** | **2** | **0.790415** |  **0.799295**   |       **0.682540**       | **0.757417** |
+|         5         |      FL       |   0.25   |   1   |   0.791903   |    0.802906     |         0.653950         |   0.749586   |
+
+총 5번에 걸친 실험의 결과를 종합해서 가장 좋은 성능을 내는 모델을 정리하자면 다음과 같다.<br>
+ YOLO v3 모델을 Transfer Learning하기 위해 사용한 Custom Dataset은 총 853장으로, 'with mask' class 3232개, 'without mask' class 717개, 'mask weared incorrect' class 123개로 구성되어 있다. class 비율을 통해 해당 Dataset은 Class Imbalacned Problem을 가지고 있다는 것을 확인할 수 있다. YOLO v3 모델에 alpha=0.25, gamma=2의 hyperparameter를 설정한 Focal Loss를 적용함으로써 Class Imbalanced Problem을 해결할 수 있으며, 이에 따라 모델의 성능 또한 가장 높일 수 있다. 해당 방법을 통해 모델을 122 epoch 학습한 상태에서 가장 좋은 성능을 확인할 수 있었는데, 이 때 모델의 성능은 'with mask' AP 0.790415, 'without mask' AP 0.799295, 'mask weared incorrect' AP 0.682540이며, 따라서 모델의 mAP는 0.757417이다.
 
 # 4. Conclusion
 
 # 5. Discussion
 
+YOLO v3 focal loss in paper
 Image Augmentation Guideline
 Recall
 
 # 6. Reference
 
+[0] [Pytorch-YOLOv3](https://github.com/YoonSungLee/PyTorch-YOLOv3)<br>
 [1] ["마스크 착용한 분만 문 열어 드립니다"](https://blog.lgcns.com/2216), LG CNS<br>
 [2] [Mask-Wearing-Detection-Project-with-YOLOv3](https://github.com/YoonSungLee/Mask-Wearing-Detection-Project-with-YOLOv3), YoonSungLee<br>
 [3] [Report: Mask-R-CNN](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Report_Mask-R-CNN.md), YoonSungLee<br>
@@ -84,4 +343,7 @@ Recall
 [7] [Review: YOLO9000: Better, Faster, Stronger](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_YOLO9000.md), YoonSungLee<br>
 [8] [Image Augmentation Tool](https://github.com/YoonSungLee/Image_Augmentation_Tool), YoonSungLee<br>
 [9] [Data Preprocessing & Augmentation](https://nittaku.tistory.com/272), nittaku<br>
-[10] [Review: Focal Loss for Dense Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_Focal_Loss_for_Dense_Object_Detection.ipynb), YoonSungLee
+[10] [Review: Focal Loss for Dense Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_Focal_Loss_for_Dense_Object_Detection.ipynb), YoonSungLee<br>
+[11] [Face Mask Detection](https://www.kaggle.com/andrewmvd/face-mask-detection?select=images), Kaggle<br>
+[12] [CC0 라이센스란? 재배포, 상업적 이용, 출처표시등 알아보기](https://webisfree.com/2015-05-19/cc0-라이센스란-재배포-상업적-이용-출처표시등-알아보기)<br>
+[13] [YOLO의 loss function에 대해](https://brunch.co.kr/@kmbmjn95/35), 김범준
