@@ -54,9 +54,9 @@ Multi Class Image를 Classification하기 위해 사용하는 일반적인 loss 
 
 ## 3.1. Dataset
 
-<img src='Image/Dataset01.png' width='100%'>
+<img src='Image/Dataset01.PNG' width='100%'>
 
-<img src='Image/Dataset02.png' width='100%'>
+<img src='Image/Dataset02.PNG' width='100%'>
 
 Mask Wearing Datset에 대한 수집 문제는 Kaggle[11]을 통해 간단히 해결했다.<br>
 만약 웹에서 공개된 Dataset을 수집할 수 없다면 직접 크롤링을 하는 등의 방법을 사용해야 하는데, 해당 문제가 사람을 대상으로 하기 때문에 초상권 문제 등의 이슈를 고려해야 할 것이다. 하지만 위의 사진과 같이 Kaggle을 통해서 쉽게 데이터를 수집할 수 있었으며, 해당 Dataset은 초상권이나 저작권 문제를 고려하지 않아도 된다. 위의 첫 번째 사진의 License를 살펴보면 'CC0:Public Domain' 이라고 적혀 있는 것을 확인할 수 있다. 해당 라이센스는 '원저작물에 대하여 저작권자가 그 권리를 포기하거나 기부한 저작물'[12]을 의미하는 것으로, 누구나 자유롭게 이용이 가능하다.<br>
