@@ -325,11 +325,14 @@ maximum mAP: 0.749586 --> 8 epoch
 
 # 4. Conclusion
 
+*making*
+
 # 5. Discussion
 
-YOLO v3 focal loss in paper
-Image Augmentation Guideline
-Recall
+*making<br>
+YOLO v3 focal loss in paper<br>
+Image Augmentation Guideline<br>
+Recall<br>*
 
 # 6. Reference
 
