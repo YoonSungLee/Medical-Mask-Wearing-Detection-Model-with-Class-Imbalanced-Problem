@@ -323,16 +323,72 @@ maximum mAP: 0.749586 --> 8 epoch
 총 5번에 걸친 실험의 결과를 종합해서 가장 좋은 성능을 내는 모델을 정리하자면 다음과 같다.<br>
  YOLO v3 모델을 Transfer Learning하기 위해 사용한 Custom Dataset은 총 853장으로, 'with mask' class 3232개, 'without mask' class 717개, 'mask weared incorrect' class 123개로 구성되어 있다. class 비율을 통해 해당 Dataset은 Class Imbalacned Problem을 가지고 있다는 것을 확인할 수 있다. YOLO v3 모델에 alpha=0.25, gamma=2의 hyperparameter를 설정한 Focal Loss를 적용함으로써 Class Imbalanced Problem을 해결할 수 있으며, 이에 따라 모델의 성능 또한 가장 높일 수 있다. 해당 방법을 통해 모델을 122 epoch 학습한 상태에서 가장 좋은 성능을 확인할 수 있었는데, 이 때 모델의 성능은 'with mask' AP 0.790415, 'without mask' AP 0.799295, 'mask weared incorrect' AP 0.682540이며, 따라서 모델의 mAP는 0.757417이다.
 
-# 4. Conclusion
+## 3.6. Output Image
+
+### Experiment 1(mAP:   0.725457)
+
+| Image01                                     | Image02                                     |
+| ------------------------------------------- | ------------------------------------------- |
+| <img src='Image/exp01_01.png' width='100%'> | <img src='Image/exp01_02.png' width='100%'> |
+
+
+
+### Experiment 2(mAP: 0.589408)
+
+| Image01                                     | Image02                                     |
+| ------------------------------------------- | ------------------------------------------- |
+| <img src='Image/exp02_01.png' width='100%'> | <img src='Image/exp02_02.png' width='100%'> |
+
+
+
+### Experiment 3(mAP: 0.733690)
+
+| Image01                                     | Image02                                     |
+| ------------------------------------------- | ------------------------------------------- |
+| <img src='Image/exp03_01.png' width='100%'> | <img src='Image/exp03_02.png' width='100%'> |
+
+
+
+### Experiment 4(mAP: **0.757417**)
+
+| Image01                                     | Image02                                     |
+| ------------------------------------------- | ------------------------------------------- |
+| <img src='Image/exp04_01.png' width='100%'> | <img src='Image/exp04_02.png' width='100%'> |
+
+
+
+### Experiment 5(mAP: 0.749586)
+
+| Image01                                     | Image02                                     |
+| ------------------------------------------- | ------------------------------------------- |
+| <img src='Image/exp05_01.png' width='100%'> | <img src='Image/exp05_02.png' width='100%'> |
+
+*discussion*<br>
+Test Image를 Experiment 별 weights에 직접 돌려봐서 눈으로 성능을 확인해보니, 뜻밖의 결과를 확인했다. 위의 결과는 각 Experiment weights 별 Test Image를 돌려서 나온 결과들 중에, 설명을 돕기 위해 선별한 두 Image 결과물이다. Image01에 대해서는 모든 Experiment weights가 좋은 성능을 보였지만, Image02에 대해서는 이야기가 좀 다르다. mAP를 평가지표로 사용했을 때, Experiment 4 weights의 mAP 값이 가장 높아서 가장 좋은 성능을 기대했는데, Experiment 4 weights의 Image02 output을 살펴보면 맨 오른쪽 사람은 탐지 조차 하지 못했다. 반면에 해당 Experiment weights를 제외한 나머지 weights들은 오른쪽 사람을 탐지했다. 위의 두 Image 외에도 여러 Test Dataset의 Image를 직접 돌려서봐서 확인한 결과, 체감상 Model이나 Dataset을 건드리지 않은 Experiment 1 weights가 탐지를 잘 해냈다. 차이라고 한다면, Experiment 1 weights가 confidence가 0.9점대로 탐지한 object를 Experiment 4 weights는 1로 탐지하는 정도이다. mAP에 의거한 정량적인 평가와 직접 눈으로 확인한 정성적인 평가는 꽤 많은 차이를 가져왔다.
+
+# 4. Discussion
+
+## 4.1. Apply Focal Loss to YOLO v3
+
+<img src='Image/Discussion01.PNG' width='100%'>
+
+사실 [YOLOv3: An Incremental Improvement](https://arxiv.org/abs/1804.02767)[14] 논문에서 이미 Focal Loss를 시도해 본 결과를 확인할 수 있다. 저자는 Focal Loss를 시도해봤지만 오히려 mAP를 0.2정도 떨어뜨린 결과를 얻었다고 말하고 있다. YOLO v3는 이미 Focal Loss가 해결하고자 하는 문제에 robust하기 때문에 적용할 필요가 없다고 주장한다. 하지만 대부분의 클래스에 대하여 loss가 발생하지 않는지에 대해서는 확신을 갖지 못한 채 해당 섹션을 마친다. 따라서 이 점에 대해 의문이 들었고, 만약 YOLO v3가 robust하다면 Class Imbalanced Problem이 발생하지 않을 것이라고 생각했기 때문에 Image Augmentation이나 Focal Loss 등의 survey를 수행했다. 물론 아직 완벽한 해결책이라고 할 수는 없지만, general한 solution이 아니라면 적용하고자 하는 상황에 따라 기대 효과는 다를 수 있다는 것을 명심해야 할 것이다.
+
+## 4.2. Image Augmentation and Focal Loss hyperparameter setting Guildline
+
+지금까지 Deep Learning은 좋은 모델을 구상하고, 경험적인 감각이나 노하우에 따라 최적의 hyperparameter를 설정하여 퍼포먼스를 내는 연구가 진행되었다고 한다면, 최근에는 hyperparameter에 구애 받지 않는 general한 모델에 대한 연구가 진행 중에 있다. hyperparameter에 의해 성능이 좌우되는 모델을 general하게 좋은 모델이라고 할 수는 없기 때문이다. 마찬가지로 이번 프로젝트를 수행하면서 이 'hyperparameter'에 대한 고민을 많이 했다. 이는 특별한 가이드도 없으며 경험이나 노하우, 감각에 의존하여 설정하기 때문이다. 한 때 잠시 공부한 적이 있던 Bayesian Optimization을 적용하려고 해도, 사전 지식이 있어야 하기 때문에 굉장히 많은 시간을 필요로 한다. 이러한 가이드를 찾으려고 하면, 대부분 돌아오는 답변은 '상황에 따라 다르다' 이다. 물론 맞는 말이지만, 이는 문제를 해결하는데에 괜찮은 답은 아니다. 이번 프로젝트를 수행하면서 Image Augmentation을 수행하거나, Focal Loss를 setting할 때 이러한 문제를 겪었다. Image Augmentation은 기법이 다양하며 또한 그 기법 안에서도 또 다른 hyperparameter가 존재하기 때문에, 어떤 방식으로 설정해야 할지 감이 오지 않았다. 나 또한 마찬가지로 내가 가진 지식에 근거하여 (1) YOLO v3는 작은 모델에 대한 detection 능력이 떨어지므로 scale을 조정하는 방법 과 (2) Image에 Noise를 추가하여 학습하면 모델이 좀 더 robust 할 수 있다는 조언을 들은 적이 있어서 GaussianNoise를 추가한 방법 을 사용하였다. 물론 각 방법의 hypterparameter는 단지 감각에 의존하여 설정했다. 이러한 방식으로 문제를 해결한다면 좋지만, 이는 다음 문제를 풀 때에는 solution이 되지 못할 가능성이 크다. 따라서 문제에 대한 solution을 찾을 때에는 general한 방법을 찾고 그 방법을 이해하는 것이 중요하다고 생각했다.
+
+## 4.3. 정량적 평가와 정성적 평가(feat. Recall)
+
+YOLO v3에 Image Augmentation이나 Focal Loss를 시도하는 방향은 좋았다. class별 AP를 확인했을 때 Class Imbalanced Problem이 어느 정도 해결되었기 때문이다. 이렇듯 정량적 평가를 통해 모델의 성능을  향상시켰다고 판단했다. 하지만 직접 눈으로 확인한 결과는 이와 달랐다. 정성적으로 각 Experiment weights를 통한 모델의 성능을 평가해봤을때, mAP가 높았던 모델이 오히려 성능이 좋지 않았다는 느낌을 받았다. 사람의 눈으로 봤을 때 부족한 결과라고 생각한다면 이는 좋은 모델이라고 할 수 없다. 이에 대한 고민이 필요하다. 여러 원인이 존재할 수 있는데 먼저 의심쩍은 것들을 아래에 정리해두었다. 결론적으로, 모델의 성능을 평가할 때 정량적인 숫자에 의해서만 모델을 평가하는 것이 아니라 직접 눈으로 확인해보고 어느 정도 성능이 나오는지에 관한 정성적인 평가가 중요하다는 것을 느꼈다.
+
+1. 평가지표를 mAP로 설정함으로써 Recall에 대한 인지 부족
+2. 다양한 threshold 평가를 하지 못한 점에 대한 잘못된 모델 성능 평가
+3. AP를 도출하는 코드의 오류(가능성 낮음)
+
+# 5. Conclusion
 
 *making*
-
-# 5. Discussion
-
-*making<br>
-YOLO v3 focal loss in paper<br>
-Image Augmentation Guideline<br>
-Recall<br>*
 
 # 6. Reference
 
@@ -349,4 +405,5 @@ Recall<br>*
 [10] [Review: Focal Loss for Dense Object Detection](https://github.com/YoonSungLee/Detection-Segmentation-Paper-Reivew-and-Report/blob/master/Paper_Review_Focal_Loss_for_Dense_Object_Detection.ipynb), YoonSungLee<br>
 [11] [Face Mask Detection](https://www.kaggle.com/andrewmvd/face-mask-detection?select=images), Kaggle<br>
 [12] [CC0 라이센스란? 재배포, 상업적 이용, 출처표시등 알아보기](https://webisfree.com/2015-05-19/cc0-라이센스란-재배포-상업적-이용-출처표시등-알아보기)<br>
-[13] [YOLO의 loss function에 대해](https://brunch.co.kr/@kmbmjn95/35), 김범준
+[13] [YOLO의 loss function에 대해](https://brunch.co.kr/@kmbmjn95/35), 김범준<br>
+[14] [YOLOv3: An Incremental Improvement](https://arxiv.org/abs/1804.02767), Joseph Redmon, Ali Farhadi
